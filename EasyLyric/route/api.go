@@ -22,6 +22,6 @@ func RegisterRoutes(app *iris.Application) {
 		mainGroup.Get("/ping", func(ctx iris.Context) {
 			response.OkWithMessageV2("ok", "ok", ctx)
 		})
-		mainGroup.Post("/scrape/kidung", controller.ScrapController.GetScrappedLyric)
+		mainGroup.Post("/scrape/lyric", controller.ScrapController.GetLyrics)
 	}
 }

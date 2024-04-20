@@ -12,7 +12,7 @@ var ScrapController = new(scrapController)
 type scrapController struct {
 }
 
-func (s *scrapController) GetScrappedLyric(ctx iris.Context) {
+func (s *scrapController) GetLyrics(ctx iris.Context) {
 	req := request.JsonBodyToMap(ctx)
 	page, limit := request.JSONValuePageInfo(req)
 	keyword := request.JSONValueString(req, "keyword")
