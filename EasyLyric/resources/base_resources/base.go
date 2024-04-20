@@ -6,5 +6,5 @@ import (
 )
 
 type Source interface {
-	Scrape(req request.ScrapReq, paging *response.Paging) ([]*response.ScrapResp, int, error)
+	Scrape(req request.ScrapReq) ([]*response.ScrapResp, int, error)
 }
