@@ -3,6 +3,7 @@ package controller
 import (
 	"easy-lyric/EasyLyric/model/request"
 	"easy-lyric/EasyLyric/model/response"
+	"easy-lyric/EasyLyric/resources"
 	"easy-lyric/EasyLyric/service"
 	"github.com/kataras/iris/v12"
 )
@@ -13,19 +14,30 @@ type scrapController struct {
 }
 
 func (s *scrapController) GetLyrics(ctx iris.Context) {
-	req := request.JsonBodyToMap(ctx)
-	page, limit := request.JSONValuePageInfo(req)
-	keyword := request.JSONValueString(req, "keyword")
+	var req request.ScrapReq
+	err := request.ReadBody(ctx, &req)
+	if err != nil {
+		response.FailWithMessageV2("failed to parse JSON body", ctx)
+		return
+	}
 
-	songs, total, err := service.ScrapService.GetScrapService(keyword, page, limit)
+	src := service.ScrapService.GetResource(req.ResourceId)
+
+	base := resources.Get(src.Name)
+	if base == nil {
+		response.FailWithMessageV2("invalid resource", ctx)
+		return
+	}
+
+	songs, total, err := base.Scrape(req)
 	if err != nil {
 		response.FailWithMessageV2(err.Error(), ctx)
 		return
 	}
 
 	paging := &response.Paging{
-		Page:  page,
-		Limit: limit,
+		Page:  req.Page,
+		Limit: req.Limit,
 		Total: total,
 	}
 
