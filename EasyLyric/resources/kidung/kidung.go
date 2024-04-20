@@ -1,8 +1,8 @@
-package service
+package kidung
 
 import (
+	"easy-lyric/EasyLyric/model/request"
 	"easy-lyric/EasyLyric/model/response"
-	"easy-lyric/config"
 	"easy-lyric/util/log"
 	"errors"
 	"fmt"
@@ -14,13 +14,19 @@ import (
 	"strings"
 )
 
-var ScrapService = new(scrapService)
+const (
+	ResourceName  = "kidung"
+	baseUrl       = "https://www.kidung.com"
+	searchBaseURL = "https://www.kidung.com/search/"
+)
 
-type scrapService struct {
+var Kidung = new(_kidung)
+
+type _kidung struct {
 }
 
-func (s *scrapService) GetScrapService(keyword string, page, limit int) ([]*response.ScrapResp, int, error) {
-	searchUrl := s.generateSearchUrl(keyword, page)
+func (k *_kidung) Scrape(req request.ScrapReq) ([]*response.ScrapResp, int, error) {
+	searchUrl := k.generateSearchUrl(req.Keyword, req.Page)
 
 	// get search result
 	resp, err := http.Get(searchUrl)
@@ -38,7 +44,7 @@ func (s *scrapService) GetScrapService(keyword string, page, limit int) ([]*resp
 	}
 
 	// get all search result url by html node
-	links := s.getAllSearchResultUrl(doc, limit)
+	links := k.getAllSearchResultUrl(doc, req.Limit)
 
 	if len(links) == 0 {
 		return nil, 0, errors.New("song not found")
@@ -47,7 +53,7 @@ func (s *scrapService) GetScrapService(keyword string, page, limit int) ([]*resp
 	// scrape it
 	var songs []*response.ScrapResp
 	for _, link := range links {
-		song, err := s.scrape(link)
+		song, err := k.startScrape(link)
 		if err != nil {
 			log.Error(err)
 		}
@@ -57,16 +63,16 @@ func (s *scrapService) GetScrapService(keyword string, page, limit int) ([]*resp
 	return songs, len(songs), nil
 }
 
-func (s *scrapService) generateSearchUrl(keyword string, page int) string {
+func (k *_kidung) generateSearchUrl(keyword string, page int) string {
 	inputs := strings.Split(strings.ToLower(strings.TrimSpace(keyword)), " ")
 	input := strings.Join(inputs, "+")
 	if page > 0 {
-		return fmt.Sprintf("%s/page/%d", config.Instance.SearchBaseURL+input, page)
+		return fmt.Sprintf("%s/page/%d", searchBaseURL+input, page)
 	}
-	return config.Instance.SearchBaseURL + input
+	return searchBaseURL + input
 }
 
-func (s *scrapService) getAllSearchResultUrl(n *html.Node, limit int) []string {
+func (k *_kidung) getAllSearchResultUrl(n *html.Node, limit int) []string {
 	var lyricLinks []string
 
 	// declare extractLinks func
@@ -74,7 +80,7 @@ func (s *scrapService) getAllSearchResultUrl(n *html.Node, limit int) []string {
 	extractLinks = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "a" {
 			for _, attr := range n.Attr {
-				if strings.Contains(attr.Val, config.Instance.BaseURL) && strings.Contains(attr.Val, "#more-") {
+				if strings.Contains(attr.Val, baseUrl) && strings.Contains(attr.Val, "#more-") {
 					lyricLinks = append(lyricLinks, attr.Val)
 				}
 			}
@@ -92,7 +98,7 @@ func (s *scrapService) getAllSearchResultUrl(n *html.Node, limit int) []string {
 	return lyricLinks
 }
 
-func (s *scrapService) scrape(lyricLink string) (song *response.ScrapResp, err error) {
+func (k *_kidung) startScrape(lyricLink string) (song *response.ScrapResp, err error) {
 	if lyricLink == "" {
 		return nil, errors.New("url not found")
 	}
