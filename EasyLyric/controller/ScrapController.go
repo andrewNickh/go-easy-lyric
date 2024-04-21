@@ -5,7 +5,10 @@ import (
 	"easy-lyric/EasyLyric/model/response"
 	"easy-lyric/EasyLyric/resources"
 	"easy-lyric/EasyLyric/service"
+	"easy-lyric/util/log"
+	"errors"
 	"github.com/kataras/iris/v12"
+	"gorm.io/gorm"
 )
 
 var ScrapController = new(scrapController)
@@ -21,7 +24,16 @@ func (s *scrapController) GetLyrics(ctx iris.Context) {
 		return
 	}
 
-	src := service.ScrapService.GetResource(req.ResourceId)
+	src, err := service.ResourceService.GetResourceService(req.ResourceId)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response.FailWithMessageV2("resource not found", ctx)
+			return
+		}
+		log.Error(err)
+		response.FailWithMessageV2("failed to get resource", ctx)
+		return
+	}
 
 	base := resources.Get(src.Name)
 	if base == nil {
