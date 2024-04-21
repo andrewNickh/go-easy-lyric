@@ -125,11 +125,15 @@ func JSONValueStringDefault(data map[string]interface{}, key string, def string)
 
 // Bool data
 func JSONValueBoolDefault(data map[string]interface{}, key string, def bool) bool {
-	value, ok := data[key].(bool)
+	value, ok := data[key].(string)
 	if !ok {
 		return def
 	}
-	return value
+	if value == "true" {
+		return true
+	} else {
+		return false
+	}
 }
 
 // Int data
