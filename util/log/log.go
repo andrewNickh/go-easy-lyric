@@ -86,10 +86,10 @@ func New(strLevel string, dir string, flag int, prefix string, logCompress bool,
 			LocalTime:  true,
 		}
 
-		if env == "dev" {
+		if env == "dev" { // log to console and file
 			mw := io.MultiWriter(hook, os.Stdout)
 			baseLogger = log.New(mw, "", flag)
-		} else {
+		} else { // only log to file
 			baseLogger = log.New(hook, "", flag)
 		}
 	} else {
