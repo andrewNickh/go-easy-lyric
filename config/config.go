@@ -19,6 +19,9 @@ type Config struct {
 	SlaveMySqlMaxOpen int         `yaml:"SlaveMySqlMaxOpen"`
 	BaseURL           string      `yaml:"BaseURL"`
 	SearchBaseURL     string      `yaml:"SearchBaseURL"`
+	Env               string      `yaml:"Env"`
+	LogLevel          string      `yaml:"LogLevel"`
+	LogDir            string      `yaml:"LogDir"`
 	RedisCache        RedisConfig `yaml:"RedisCache"`
 }
 
@@ -41,5 +44,7 @@ func Init() {
 	err = viper.Unmarshal(&Instance)
 	if err != nil {
 		log.Fatalf("unable to decode into struct, %v", err)
+	} else {
+		Log()
 	}
 }
