@@ -28,6 +28,15 @@ func RegisterRoutes(app *iris.Application) {
 		scrapeGroup.Post("/lyric", controller.ScrapController.GetLyrics)
 	}
 
+	// api/song
+	songGroup := mainGroup.Party("/song")
+	{
+		songGroup.Get("/search", controller.SongController.SearchSong)
+		songGroup.Post("/create", controller.SongController.CreateSong)
+		songGroup.Post("/update", controller.SongController.UpdateSong)
+		songGroup.Post("/delete", controller.SongController.DeleteSong)
+	}
+
 	// api/resource
 	resourceGroup := mainGroup.Party("/resource")
 	{

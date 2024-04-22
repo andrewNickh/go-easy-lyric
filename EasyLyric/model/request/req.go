@@ -16,6 +16,18 @@ type ScrapReq struct {
 	Limit      int    `json:"limit"`
 }
 
+type SaveSongReq struct {
+	ResourceId int64  `json:"resourceId"`
+	Url        string `json:"url"`
+	Title      string `json:"title"`
+	Lyric      string `json:"lyric"`
+}
+
+type UpdateSongReq struct {
+	GetById
+	SaveSongReq
+}
+
 type CreateResourceReq struct {
 	Name   string `json:"name"`
 	Status bool   `json:"status"`
