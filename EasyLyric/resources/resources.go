@@ -3,6 +3,7 @@ package resources
 import (
 	"easy-lyric/EasyLyric/resources/base_resources"
 	"easy-lyric/EasyLyric/resources/kidung"
+	"easy-lyric/EasyLyric/resources/liriklagurohani"
 	"easy-lyric/EasyLyric/resources/unlimited"
 )
 
@@ -14,6 +15,8 @@ func Get(resourceName string) base_resources.Source {
 		resource = kidung.Kidung
 	case unlimited.ResourceName:
 		resource = unlimited.Unlimited
+	case liriklagurohani.ResourceName:
+		resource = liriklagurohani.LirikLagu
 	default:
 		return nil
 	}
