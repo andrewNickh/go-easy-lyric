@@ -3,6 +3,7 @@ package resources
 import (
 	"easy-lyric/EasyLyric/resources/base_resources"
 	"easy-lyric/EasyLyric/resources/kidung"
+	"easy-lyric/EasyLyric/resources/unlimited"
 )
 
 func Get(resourceName string) base_resources.Source {
@@ -11,6 +12,8 @@ func Get(resourceName string) base_resources.Source {
 	switch resourceName {
 	case kidung.ResourceName:
 		resource = kidung.Kidung
+	case unlimited.ResourceName:
+		resource = unlimited.Unlimited
 	default:
 		return nil
 	}
