@@ -23,17 +23,14 @@ func DBSlave() *gorm.DB {
 
 func initSlave() {
 	gormConf := &gorm.Config{}
-	newLogger := logger.New(
-		milog.New(log.GetLogger().GetWriter(), "\r\n[db]", log.LstdFlags), // io writer
+	gormConf.Logger = logger.New(milog.New(log.GetLogger().GetWriter(), "\r\n[db]", log.LstdFlags),
 		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			ParameterizedQueries:      false,       // Don't include params in the SQL log
-			Colorful:                  false,       // Disable color
-		},
-	)
-	gormConf.Logger = newLogger
+			SlowThreshold:             3 * time.Second,
+			LogLevel:                  If(config.Instance.ShowSql, logger.Info, logger.Warn).(logger.LogLevel),
+			Colorful:                  true,
+			IgnoreRecordNotFoundError: true,
+			ParameterizedQueries:      true,
+		})
 	err := openSlaveDB(config.Instance.SlaveMySqlUrl, gormConf,
 		config.Instance.SlaveMySqlMaxIdle, config.Instance.SlaveMySqlMaxOpen)
 	if err != nil {
@@ -67,6 +64,5 @@ func openSlaveDB(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int
 		log.Error(err)
 	}
 
-	log.Info("连接mysql服务(从库)成功")
 	return
 }

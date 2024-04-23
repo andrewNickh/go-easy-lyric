@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	milog "log"
-	"os"
 	"time"
 )
 
@@ -29,17 +28,14 @@ func Master() *gorm.DB {
 
 func initMaster() {
 	gormConf := &gorm.Config{}
-	newLogger := logger.New(
-		milog.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+	gormConf.Logger = logger.New(milog.New(log.GetLogger().GetWriter(), "\r\n[db]", log.LstdFlags),
 		logger.Config{
-			SlowThreshold:             time.Second,   // Slow SQL threshold
-			LogLevel:                  logger.Silent, // Log level
-			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
-			ParameterizedQueries:      true,          // Don't include params in the SQL log
-			Colorful:                  false,         // Disable color
-		},
-	)
-	gormConf.Logger = newLogger
+			SlowThreshold:             3 * time.Second,
+			LogLevel:                  If(config.Instance.ShowSql, logger.Info, logger.Warn).(logger.LogLevel),
+			Colorful:                  true,
+			IgnoreRecordNotFoundError: true,
+			ParameterizedQueries:      true,
+		})
 	err := openDB(config.Instance.MySqlUrl, gormConf,
 		config.Instance.MySqlMaxIdle, config.Instance.MySqlMaxOpen)
 	if err != nil {
@@ -73,4 +69,11 @@ func openDB(dsn string, config *gorm.Config, maxIdleConns, maxOpenConns int) (er
 		log.Error(err)
 	}
 	return
+}
+
+func If(b bool, t, f interface{}) interface{} {
+	if b {
+		return t
+	}
+	return f
 }
